@@ -1,80 +1,54 @@
 package usecase
 
-import "github.com/ValeryBMSTU/web-rk2/internal/entities"
+import (
+	"github.com/Amrisport/web-rk2/internal/entities"
 
-func (u *Usecase) CreateUser(user entities.User) (*entities.User, error) {
-	if user, err := u.p.SelectUserByEmail(user.Email); err != nil {
-		return nil, err
-	} else if user != nil {
-		return nil, entities.ErrUserEmailConflict
+	"github.com/labstack/echo/v4"
+)
+
+func (u *Usecase) CreateAnswer(c echo.Context) int {
+	var input struct {
+		Ans1 int `json:"ans1"`
+		Ans2 int `json:"ans2"`
+		Ans3 int `json:"ans3"`
+		Ans4 int `json:"ans4"`
+		Ans5 int `json:"ans5"`
 	}
 
-	if user, err := u.p.SelectUserByName(user.Name); err != nil {
-		return nil, err
-	} else if user != nil {
-		return nil, entities.ErrUserNameConflict
+	points := [5]int{3, 3, 2, 3, 2}
+	var correct int
+	correct = 0
+	if points[0] == input.Ans1 {
+		correct++
+	}
+	if points[1] == input.Ans2 {
+		correct++
+	}
+	if points[2] == input.Ans3 {
+		correct++
+	}
+	if points[3] == input.Ans4 {
+		correct++
+	}
+	if points[4] == input.Ans5 {
+		correct++
 	}
 
-	createdUser, err := u.p.InsertUser(user)
+	return correct
+}
+func (u *Usecase) ListQuestions() ([]*entities.Question, error) {
+	questions, err := u.p.GetQuestion()
 	if err != nil {
 		return nil, err
 	}
 
-	return createdUser, nil
+	return questions, nil
 }
 
-func (u *Usecase) ListUsers() ([]*entities.User, error) {
-	users, err := u.p.SelectAllUsers()
+func (u *Usecase) GetScore() (*entities.Score, error) {
+	score, err := u.p.GetScore()
 	if err != nil {
 		return nil, err
 	}
-
-	return users, nil
-}
-
-func (u *Usecase) GetUserByID(id int) (*entities.User, error) {
-	user, err := u.p.SelectUserByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if user == nil {
-		return nil, entities.ErrUserNotFound
-	}
-
-	return user, nil
-}
-
-func (u *Usecase) UpdateUserByID(id int, user entities.User) (*entities.User, error) {
-	oldUser, err := u.p.SelectUserByID(id)
-	if err != nil {
-		return nil, err
-	}
-
-	if user, err := u.p.SelectUserByEmail(user.Email); err != nil {
-		return nil, err
-	} else if user != nil && user.ID != oldUser.ID {
-		return nil, entities.ErrUserEmailConflict
-	}
-
-	if user, err := u.p.SelectUserByName(user.Name); err != nil {
-		return nil, err
-	} else if user != nil && user.ID != oldUser.ID {
-		return nil, entities.ErrUserNameConflict
-	}
-
-	updatedUser, err := u.p.UpdateUserByID(id, user)
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedUser, nil
-}
-
-func (u *Usecase) DeleteUserByID(id int) error {
-	if err := u.p.DeleteUserByID(id); err != nil {
-		return err
-	}
-
-	return nil
+	return score, nil
 }
